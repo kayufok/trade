@@ -1,0 +1,2 @@
+# trade
+auto trading app

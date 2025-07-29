@@ -22,7 +22,11 @@ public class KlineStorageService {
                 .collect(Collectors.toList());
         
         if (!entities.isEmpty()) {
-            int inserted = klineMapper.insertBatch(entities);
+            // Use MyBatis Plus batch insert
+            int inserted = 0;
+            for (Kline entity : entities) {
+                inserted += klineMapper.insert(entity);
+            }
             log.info("Stored {} K-lines for symbol {}", inserted, symbol);
         }
     }

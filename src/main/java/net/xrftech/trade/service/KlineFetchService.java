@@ -2,6 +2,8 @@ package net.xrftech.trade.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,7 +43,8 @@ public class KlineFetchService {
                 if (!response.isSuccessful()) {
                     throw new RuntimeException("Failed to fetch K-lines: " + response.code());
                 }
-                
+
+                assert response.body() != null;
                 String responseBody = response.body().string();
                 JsonNode jsonNode = objectMapper.readTree(responseBody);
                 
@@ -74,21 +77,52 @@ public class KlineFetchService {
         return kline;
     }
     
-    private boolean isValidKline(BinanceKline kline) {
+        private boolean isValidKline(BinanceKline kline) {
+        // Check for null values
         if (kline.getOpen() == null || kline.getHigh() == null || kline.getLow() == null ||
             kline.getClose() == null || kline.getVolume() == null) {
             log.warn("Invalid K-line: null values detected");
             return false;
         }
-        if (kline.getOpen() < 0 || kline.getHigh() < 0 || kline.getLow() < 0 || 
+        
+        // Check for negative values
+        if (kline.getOpen() < 0 || kline.getHigh() < 0 || kline.getLow() < 0 ||
             kline.getClose() < 0 || kline.getVolume() < 0) {
             log.warn("Invalid K-line: negative values detected");
             return false;
         }
+        
+        // Check for logical consistency (high >= low, high >= open, high >= close)
+        if (kline.getHigh() < kline.getLow()) {
+            log.warn("Invalid K-line: high price ({}) is less than low price ({})", kline.getHigh(), kline.getLow());
+            return false;
+        }
+        
+        if (kline.getHigh() < kline.getOpen() || kline.getHigh() < kline.getClose()) {
+            log.warn("Invalid K-line: high price ({}) is less than open ({}) or close ({})", 
+                    kline.getHigh(), kline.getOpen(), kline.getClose());
+            return false;
+        }
+        
+        if (kline.getLow() > kline.getOpen() || kline.getLow() > kline.getClose()) {
+            log.warn("Invalid K-line: low price ({}) is greater than open ({}) or close ({})", 
+                    kline.getLow(), kline.getOpen(), kline.getClose());
+            return false;
+        }
+        
+        // Check for reasonable price ranges (prevent extreme outliers)
+        if (kline.getOpen() > 1000000 || kline.getHigh() > 1000000 || kline.getLow() > 1000000 || kline.getClose() > 1000000) {
+            log.warn("Invalid K-line: price values too high (potential outlier)");
+            return false;
+        }
+        
         return true;
     }
     
+    @Setter
+    @Getter
     public static class BinanceKline {
+        // Getters and Setters
         private Long openTime;
         private Double open;
         private Double high;
@@ -96,27 +130,6 @@ public class KlineFetchService {
         private Double close;
         private Double volume;
         private Long closeTime;
-        
-        // Getters and Setters
-        public Long getOpenTime() { return openTime; }
-        public void setOpenTime(Long openTime) { this.openTime = openTime; }
-        
-        public Double getOpen() { return open; }
-        public void setOpen(Double open) { this.open = open; }
-        
-        public Double getHigh() { return high; }
-        public void setHigh(Double high) { this.high = high; }
-        
-        public Double getLow() { return low; }
-        public void setLow(Double low) { this.low = low; }
-        
-        public Double getClose() { return close; }
-        public void setClose(Double close) { this.close = close; }
-        
-        public Double getVolume() { return volume; }
-        public void setVolume(Double volume) { this.volume = volume; }
-        
-        public Long getCloseTime() { return closeTime; }
-        public void setCloseTime(Long closeTime) { this.closeTime = closeTime; }
+
     }
 } 

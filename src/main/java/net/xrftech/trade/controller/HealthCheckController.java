@@ -28,7 +28,7 @@ public class HealthCheckController {
         response.put("timestamp", LocalDateTime.now());
         response.put("service", "trade");
         
-        log.info("Health check completed successfully", response);
+        log.info("Health check completed successfully: {}", response);
         return ResponseEntity.ok(response);
     }
 

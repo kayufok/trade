@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: trade
+  datasource:
+    url: jdbc:postgresql://localhost:5432/trade
+    username: your_username
+    password: your_password
+    driver-class-name: org.postgresql.Driver
+
+# Binance API configuration
+# Get your API keys from: https://testnet.binance.vision/
+binance:
+  testnet:
+    api-key: "your_binance_testnet_api_key"
+    secret: "your_binance_testnet_secret"
+    base-url: "https://testnet.binance.vision"
+
+# MyBatis Plus configuration
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Server configuration (optional)
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Logging configuration (optional)
+logging:
+  level:
+    net.xrftech.trade: DEBUG
+    org.springframework.web: INFO
+    org.mybatis: INFO
+    org.postgresql: WARN 

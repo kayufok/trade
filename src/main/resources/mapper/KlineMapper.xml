@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.xrftech.trade.mapper.KlineMapper">
+    
+    <!-- Batch insert K-lines -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO kline (symbol, timestamp, open, high, low, close, volume)
+        VALUES
+        <foreach collection="klines" item="item" separator=",">
+            (#{item.symbol}, #{item.timestamp}, #{item.open}, #{item.high}, #{item.low}, #{item.close}, #{item.volume})
+        </foreach>
+    </insert>
+    
+    <!-- Insert single K-line -->
+    <insert id="insert" parameterType="net.xrftech.trade.model.Kline">
+        INSERT INTO kline (symbol, timestamp, open, high, low, close, volume)
+        VALUES (#{symbol}, #{timestamp}, #{open}, #{high}, #{low}, #{close}, #{volume})
+    </insert>
+    
+    <!-- Select K-lines by symbol -->
+    <select id="selectBySymbol" resultType="net.xrftech.trade.model.Kline">
+        SELECT id, symbol, timestamp, open, high, low, close, volume
+        FROM kline
+        WHERE symbol = #{symbol}
+        ORDER BY timestamp DESC
+        LIMIT 100
+    </select>
+    
+</mapper> 

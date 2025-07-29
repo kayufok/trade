@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-trade
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trade
+      POSTGRES_USER: trade_user
+      POSTGRES_PASSWORD: your_secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - /home/database/trade:/var/lib/postgresql/data
+    networks:
+      - nginx-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trade_user -d trade"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  nginx-net:
+    external: true
